@@ -20,9 +20,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  User.findById("5baa2528563f16379fc8a610")
+  User.findById("6463fcd9d6ca6288d6d05317")
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch((err) => console.log(err));
@@ -34,8 +34,21 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 const uri = process.env.URI;
 mongoose
-  .connect(`${uri}`)
+  .connect(`${uri}`, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: "Enes",
+          email: "sahanenesss@gmail.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+
     app.listen(3000);
   })
   .catch((err) => {
